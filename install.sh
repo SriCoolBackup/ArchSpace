@@ -2,9 +2,10 @@
 set -euo pipefail
 SCRIPT_TITLE="ArchSpace by Sri™"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-MODULES_DIR="$SCRIPT_DIR/Modules"
+MODULES_DIR="$SCRIPT_DIR/Modules/tos"
 TOS_FILE="$MODULES_DIR/tos.txt"
 TOS_SCRIPT="$MODULES_DIR/tos.sh"
+HOME_SCRIPT="$SCRIPT_DIR/Modules/home.sh"
 DIALOG_PACKAGE="dialog"
 
 cleanup(){ clear; }
@@ -37,24 +38,24 @@ main(){
             status=$(<"$TOS_FILE")
         else
             dialog --title "$SCRIPT_TITLE - Error" \
-                --msgbox "\nMissing file:\n$TOS_SCRIPT" 10 60 2>/dev/tty
+            --msgbox "\nMissing file:\n$TOS_SCRIPT" 10 60 2>/dev/tty
             exit 1
         fi
     fi
 
-    if [ "$status" = "accepted" ]; then
-        dialog --title "$SCRIPT_TITLE - Installation Started" \
-            --msgbox "\nTOS verified.\nInstallation process initiated successfully.\nYour modules are now loading..." 12 60 2>/dev/tty
-        clear
-        echo "🔥 Installation in progress..."
-        sleep 2
-        echo "✅ All systems configured successfully."
-        echo "🚀 ArchSpace ready, Commander Sri 🐧"
+    for i in {5..1}; do
+        dialog --title "$SCRIPT_TITLE - TOS Accepted" \
+        --infobox "\n✅ Terms and Service accepted.\n\nMoving on in... $i" 10 60
         sleep 1
+    done
+
+    clear
+    if [ -f "$HOME_SCRIPT" ]; then
+        chmod +x "$HOME_SCRIPT"
+        bash "$HOME_SCRIPT"
     else
-        dialog --title "$SCRIPT_TITLE - Session Ended" \
-            --msgbox "\nTOS not accepted.\nInstallation aborted." 10 50 2>/dev/tty
-        exit 0
+        echo "❌ Missing home script at: $HOME_SCRIPT"
+        exit 1
     fi
 }
 
